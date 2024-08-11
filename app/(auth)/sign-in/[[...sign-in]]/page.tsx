@@ -1,12 +1,15 @@
-'use client'
-import React from 'react'
-import { useContext, useEffect, useState } from 'react'
+'use client';
+import React, { useState } from 'react';
+import { useRouter } from 'next/navigation'; // Import useRouter from next/router
 import { signIn } from '../../../_utils/authApi';
+
+
 
 function Page() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const router = useRouter(); // Initialize useRouter
 
   const handleSubmit = async (event) => {
     event.preventDefault();
@@ -15,12 +18,33 @@ function Page() {
       const result = await signIn(email, password);
       console.log("Sign in successful:", result);
 
-      // Save the JWT token and user role in local storage or context
+      // Store token and role in localStorage
       localStorage.setItem('token', result.accessToken);
       localStorage.setItem('role', result.role);
+      localStorage.setItem('id', result.id);
 
-      // Redirect to the dashboard or home page
-      window.location.href = '/'; // Redirect to homepage or dashboard
+      // Determine the redirect URL based on the user's role
+      let redirectUrl;
+
+      switch (result.role) {
+        case 'ROLE_ADMIN':
+          redirectUrl = '/';
+          break;
+        case 'ROLE_RH':
+          redirectUrl = '/';
+          break;
+        case 'ROLE_EMPLOYE':
+          redirectUrl = '/';
+          break;
+        default:
+          console.warn(`Unknown role: ${result.role}`);
+          redirectUrl = '/'; // Default redirect URL
+          break;
+      }
+
+      // Redirect to the determined URL using router.push
+      router.push(redirectUrl);
+
     } catch (error) {
       setError('Sign in failed. Please check your credentials and try again.');
       console.error("Sign in error:", error);

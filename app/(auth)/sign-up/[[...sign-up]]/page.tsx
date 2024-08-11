@@ -14,23 +14,38 @@ function page() {
 
   const handleSubmit = async (event) => {
     event.preventDefault();
-
+  
     if (password !== confirmPassword) {
       alert("Passwords do not match!");
       return;
     }
-
+  
+    // Define mappings for roles
+    const roleMappings = {
+      ADMIN: { role: 'ROLE_ADMIN', type: 'Administrateur' },
+      EMPLOYEE: { role: 'ROLE_EMPLOYE', type: 'Employe' },
+      RH: { role: 'ROLE_RH', type: 'RH' }
+    };
+  
+    // Get formatted role and type based on selected role
+    const { role: roleFormatted, type } = roleMappings[role] || {};
+  
+    if (!roleFormatted || !type) {
+      setError('Invalid role selected.');
+      return;
+    }
+  
     const userData = {
       nom,
       prenom,
       email,
       motDePasse: password,
-      role,
-      type: role // Set 'type' according to role
+      role: roleFormatted, // Formatted role for JSON
+      type // Type for JSON
     };
-
+  
     try {
-      const result = await registerUser(role, userData);
+      const result = await registerUser(role, userData); // Pass role for URL and userData for body
       console.log("User registered successfully:", result);
       // Handle successful registration (e.g., redirect to sign-in page)
       window.location.href = '/sign-in'; // Redirect to sign-in page
@@ -39,6 +54,7 @@ function page() {
       console.error("Registration error:", error);
     }
   };
+  
   return (
     <section className="bg-white dark:bg-gray-900">
     <div className="container px-6 py-24 mx-auto lg:py-32">
